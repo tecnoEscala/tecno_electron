@@ -34,7 +34,7 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^14.0.0",
+    "electron": "^20.1.4",
     "electron-builder": "^22.13.1"
   }
 }
