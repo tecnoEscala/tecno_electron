@@ -4,8 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-// const mainLoadFile = './tecno-escala-desktop/index.html';
-const mainLoadFile = '../tecno_desktop/dist/tecno-escala-desktop/index.html';
+const mainLoadFile = './tecno-escala-desktop/index.html';
+// const mainLoadFile = '../tecno_desktop/dist/tecno-escala-desktop/index.html';
 
 function createWindow() {
   // Create the browser window.
@@ -18,13 +18,13 @@ function createWindow() {
     }
   })
   // and load the index.html of the app.
-  // mainWindow.loadFile('./tecno-escala-desktop/index.html');
   mainWindow.loadFile(mainLoadFile);
+  // mainWindow.loadURL('http://localhost:4200/')
   mainWindow.maximize();
   mainWindow.show();
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -69,7 +69,6 @@ ipcMain.on("newReportWindow", (event, url) => {
       webSecurity: false,
     }
   });
-  console.log('++++', url);
   reportWin.loadURL(url);
   reportWin.maximize();
   reportWin.show();
