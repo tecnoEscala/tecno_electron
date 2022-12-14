@@ -84,7 +84,7 @@ ipcMain.on("generatePdf", (event, args) => {
     fs.mkdirSync(documentsDirectory);
   }
 
-  var filepath2 = path.join(documentsDirectory, `report_${name}.pdf`);
+  var filepath2 = path.join(documentsDirectory, `${name}.pdf`);
   var options2 = {
     marginsType: 1,
     pageSize: 'A4',
