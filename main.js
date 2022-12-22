@@ -19,12 +19,12 @@ function createWindow() {
   })
   // and load the index.html of the app.
   mainWindow.loadFile(mainLoadFile);
-  // mainWindow.loadURL('http://localhost:4200/')
+  // mainWindow.loadURL('http://localhost:4200/');
   mainWindow.maximize();
   mainWindow.show();
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -73,6 +73,22 @@ ipcMain.on("newReportWindow", (event, url) => {
   reportWin.maximize();
   reportWin.show();
 })
+
+
+ipcMain.on("persistErrors", (event, args) => {
+  const { field, value } = JSON.parse(args);
+  const documentsDirectory = path.join(os.homedir(), '/Documents/TecnoEscalaReports');
+  if (!fs.existsSync(documentsDirectory)) {
+    fs.mkdirSync(documentsDirectory);
+  }
+  var filepath = path.join(documentsDirectory, 'erros.json');
+  if (!fs.existsSync(filepath)) {
+    fs.writeFileSync(filepath, JSON.stringify({ [field]: value }) + ',\n\n');
+  } else {
+    fs.appendFileSync(filepath, JSON.stringify({ [field]: value }) + ',\n\n');
+  }
+})
+
 
 
 ipcMain.on("generatePdf", (event, args) => {
