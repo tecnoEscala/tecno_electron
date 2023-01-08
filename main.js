@@ -89,6 +89,15 @@ ipcMain.on("persistErrors", (event, args) => {
   }
 })
 
+ipcMain.on("persistSync", (event, args) => {
+  const { value } = JSON.parse(args);
+  const documentsDirectory = path.join(os.homedir(), '/Documents/TecnoEscalaReports');
+  if (!fs.existsSync(documentsDirectory)) {
+    fs.mkdirSync(documentsDirectory);
+  }
+  var filepath = path.join(documentsDirectory, 'syncQueue.json');
+  fs.writeFileSync(filepath, JSON.stringify(value));
+})
 
 
 ipcMain.on("generatePdf", (event, args) => {
