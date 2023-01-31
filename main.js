@@ -7,6 +7,8 @@ const os = require('os')
 const mainLoadFile = './tecno-escala-desktop/index.html';
 // const mainLoadFile = '../tecno_desktop/dist/tecno-escala-desktop/index.html';
 
+let currentReport;
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -72,6 +74,8 @@ ipcMain.on("newReportWindow", (event, url) => {
   reportWin.loadURL(url);
   reportWin.maximize();
   reportWin.show();
+  // Global variable reportWin
+  currentReport = reportWin;
 })
 
 
@@ -127,11 +131,17 @@ ipcMain.on("generatePdf", (event, args) => {
     }
   });
 
+
   win.loadURL(url);
   // win.show();
+  // win.webContents.openDevTools();
+
+  if (url.includes('weight_scale_print')) {
+    currentReport = win;
+  }
 
   win.webContents.on('did-finish-load', () => {
-    win.webContents.printToPDF(options2).then(data => {
+    currentReport.webContents.printToPDF(options2).then(data => {
       fs.writeFile(filepath2, data, function (err) {
         if (err) {
           console.log('err', err);
@@ -145,9 +155,7 @@ ipcMain.on("generatePdf", (event, args) => {
       console.log('error', error)
       relaunchApp(win, 'error', 'No se pudo generar archivo pdf.')
     });
-
   });
-
 });
 
 
