@@ -42,9 +42,13 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
+ipcMain.on("system", (event, type) => {
+  if (type === 'appVersion') event.reply("res", app.getVersion());
+});
 
-// ipcMain.on("system", (event, type) => {
-//   if (type === "appversion") { event.reply("res", app.getVersion()); }
+
+// ipcMain.on("store-get", (event, key) => {
+//   vent.reply("res", Store.get(key));
 // });
 
 /* ipcMain is listening the "message" channel, and when the message arrives, 
