@@ -1,13 +1,18 @@
 // Modules to control application life and create native browser window
 const { app, ipcMain, BrowserWindow, dialog } = require('electron')
+const Store = require('electron-store');
+
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
+const store = new Store();
+
+const devMode = true;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
-// const mainLoadFile = '../tecno_desktop/dist/tecno-escala-desktop/index.html';
 
 let currentReport;
+let multipleReports = [];
 
 function createWindow() {
   // Create the browser window.
@@ -19,15 +24,26 @@ function createWindow() {
       webSecurity: false,
     }
   })
-  // and load the index.html of the app.
-  mainWindow.loadFile(mainLoadFile);
-  // mainWindow.loadURL('http://localhost:4200/');
+
+  if (!devMode) {
+    mainWindow.loadFile(mainLoadFile);
+  } else {
+    mainWindow.loadURL('http://localhost:4200/');
+  }
   mainWindow.maximize();
   mainWindow.show();
 
+  store.set('appVersion', JSON.stringify({ version: app.getVersion() }));
+
+  mainWindow.on('close', function (e) {
+    if (process.platform !== 'darwin') app.quit();
+  });
+
+  // C:\Users\lenin\AppData\Roaming\tecnoescala
+  // console.log('database address', app.getPath('userData'));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  if (devMode) mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
@@ -37,13 +53,25 @@ app.whenReady().then(() => {
   })
 })
 
-
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') app.quit();
 })
 
-ipcMain.on("system", (event, type) => {
-  if (type === 'appVersion') event.reply("res", app.getVersion());
+
+// database Get
+ipcMain.on("database-get", (event, key) => {
+  event.reply(key, store.get(key));
+});
+
+// database set
+ipcMain.on("database-set", (event, args) => {
+  const { key, value } = JSON.parse(args);
+  store.set(key, value);
+});
+
+// database reset
+ipcMain.on("database-reset", (event, args) => {
+  store.clear();
 });
 
 
@@ -61,7 +89,7 @@ ipcMain.on("system", (event, type) => {
 // });
 
 ipcMain.on("newReportWindow", (event, url) => {
-  let reportWin = new BrowserWindow({
+  const reportWin = new BrowserWindow({
     show: false,
     webPreferences: {
       nodeIntegration: true,
@@ -73,9 +101,16 @@ ipcMain.on("newReportWindow", (event, url) => {
   reportWin.maximize();
   reportWin.show();
   // Global variable reportWin
-  currentReport = reportWin;
-})
 
+  if (url.includes('weight_scale_print')) {
+    if (multipleReports?.length >= 2) multipleReports = [];
+    multipleReports.push({ url, win: reportWin });
+  } else {
+    currentReport = reportWin;
+  }
+
+  if (devMode) reportWin.webContents.openDevTools();
+})
 
 ipcMain.on("persistErrors", (event, args) => {
   const { field, value } = JSON.parse(args);
@@ -101,7 +136,6 @@ ipcMain.on("persistSync", (event, args) => {
   fs.writeFileSync(filepath, JSON.stringify(value));
 })
 
-
 ipcMain.on("generatePdf", (event, args) => {
 
   const { url, name } = JSON.parse(args)
@@ -111,7 +145,8 @@ ipcMain.on("generatePdf", (event, args) => {
     fs.mkdirSync(documentsDirectory);
   }
 
-  var filepath2 = path.join(documentsDirectory, `${name}.pdf`);
+  var parsedName = name.replace('/', '-');
+  var filepath2 = path.join(documentsDirectory, `${parsedName}.pdf`);
   var options2 = {
     marginsType: 1,
     pageSize: 'A4',
@@ -120,7 +155,7 @@ ipcMain.on("generatePdf", (event, args) => {
     landscape: false
   }
 
-  let win = new BrowserWindow({
+  const win = new BrowserWindow({
     show: false,
     webPreferences: {
       nodeIntegration: true,
@@ -131,36 +166,45 @@ ipcMain.on("generatePdf", (event, args) => {
 
 
   win.loadURL(url);
-  // win.show();
-  // win.webContents.openDevTools();
 
   if (url.includes('weight_scale_print')) {
-    currentReport = win;
+    currentReport = multipleReports.find(item => item.url === url)?.win;
+    multipleReports = multipleReports.filter(item => item.url !== url)
   }
 
+  // currentReport.show();
+  // currentReport.webContents.openDevTools();
+
   win.webContents.on('did-finish-load', () => {
-    currentReport.webContents.printToPDF(options2).then(data => {
-      fs.writeFile(filepath2, data, function (err) {
-        if (err) {
-          console.log('err', err);
-          relaunchApp(win, 'error', 'No se pudo generar archivo pdf.')
-        } else {
-          console.log('PDF Generated Successfully');
-          relaunchApp(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/')
-        }
+    setTimeout(() => {
+      currentReport.webContents.printToPDF(options2).then(data => {
+        fs.writeFile(filepath2, data, function (err) {
+          if (err) {
+            console.log('err', err);
+            systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
+          } else {
+            console.log('PDF Generated Successfully');
+            systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
+          }
+        });
+      }).catch(error => {
+        console.log('error', error)
+        systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
       });
-    }).catch(error => {
-      console.log('error', error)
-      relaunchApp(win, 'error', 'No se pudo generar archivo pdf.')
-    });
+
+    }, 2000);
   });
 });
 
-
-function relaunchApp(win, type, message) {
+function systemMessage(win, type, message, closeWindow = true) {
   dialog.showMessageBox(win, {
     type,
     title: 'Tecno Escala System',
     message,
-  });
+  }).then(result => {
+    if (closeWindow) {
+      win.close();
+      currentReport.close();
+    }
+  })
 }

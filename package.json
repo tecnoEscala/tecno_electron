@@ -1,7 +1,7 @@
 {
   "name": "tecnoescala",
   "product_name": "Tecnoescala",
-  "version": "1.1.14",
+  "version": "1.2.13",
   "description": "Aplicacion tecnoescala",
   "main": "main.js",
   "scripts": {
@@ -37,5 +37,8 @@
   "devDependencies": {
     "electron": "^14.0.0",
     "electron-builder": "^22.13.1"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
   }
 }
