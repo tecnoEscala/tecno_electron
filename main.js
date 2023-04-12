@@ -7,7 +7,7 @@ const path = require('path')
 const os = require('os')
 const store = new Store();
 
-const devMode = true;
+const devMode = false;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
