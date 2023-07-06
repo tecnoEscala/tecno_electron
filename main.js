@@ -147,6 +147,7 @@ ipcMain.on("generatePdf", (event, args) => {
 
   var parsedName = name.replace('/', '-');
   var filepath2 = path.join(documentsDirectory, `${parsedName}.pdf`);
+  // Docs https://www.electronjs.org/docs/latest/api/web-contents
   var options2 = {
     marginsType: 1,
     pageSize: 'A4',
