@@ -152,7 +152,15 @@ ipcMain.on("generatePdf", (event, args) => {
     pageSize: 'A4',
     printBackground: false,
     printSelectionOnly: false,
-    landscape: false
+    landscape: false,
+    preferCSSPageSize: true,
+    fitToPageEnabled: true,
+    margins: {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0
+    }
   }
 
   const win = new BrowserWindow({
