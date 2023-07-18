@@ -154,7 +154,7 @@ ipcMain.on("generatePdf", (event, args) => {
     printBackground: false,
     printSelectionOnly: false,
     landscape: false,
-    preferCSSPageSize: true,
+    // preferCSSPageSize: true,
     fitToPageEnabled: true,
     margins: {
       top: 0,
