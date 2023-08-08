@@ -148,20 +148,21 @@ ipcMain.on("generatePdf", (event, args) => {
   var parsedName = name.replace('/', '-');
   var filepath2 = path.join(documentsDirectory, `${parsedName}.pdf`);
   // Docs https://www.electronjs.org/docs/latest/api/web-contents
+
+  // printSelectionOnly: false,
+  // preferCSSPageSize: true,
+  // fitToPageEnabled: true,
   var options2 = {
-    marginsType: 1,
-    pageSize: 'A4',
-    printBackground: false,
-    printSelectionOnly: false,
-    landscape: false,
-    // preferCSSPageSize: true,
-    fitToPageEnabled: true,
-    margins: {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0
-    }
+    "marginsType": 1,
+    "landscape": false,
+    "pageSize": 'A4',
+    "margins": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+    },
+    "fitToPageEnabled": true,
   }
 
   const win = new BrowserWindow({
