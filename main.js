@@ -88,6 +88,28 @@ ipcMain.on("database-reset", (event, args) => {
 //   }
 // });
 
+ipcMain.on("newSmallWindow", (event, url) => {
+  const smallWindow = new BrowserWindow({
+    show: false,
+    width: 800,
+    height: 500,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true,
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false,
+    }
+  });
+  smallWindow.loadURL(url);
+  // smallWindow.maximize();
+  smallWindow.show();
+
+  if (devMode) smallWindow.webContents.openDevTools();
+})
+
+
+
+
 ipcMain.on("newReportWindow", (event, url) => {
   const reportWin = new BrowserWindow({
     show: false,
