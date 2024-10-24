@@ -1,13 +1,17 @@
 // Modules to control application life and create native browser window
-const { app, ipcMain, BrowserWindow, dialog } = require('electron')
+const { app, ipcMain, BrowserWindow, dialog, clipboard } = require('electron')
 const Store = require('electron-store');
 
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const store = new Store();
+const attachmentStore = new Store({ name: 'attachments' });
+const fetch = require("node-fetch");
+var FormData = require('form-data');
 
-const devMode = false;
+
+const devMode = true;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
@@ -44,6 +48,10 @@ function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
+
+  setTimeout(() => {
+    pdfProtectInApi("C:/Users/lenin/Documents/TecnoEscalaReports/report.pdf", mainWindow, 'report.pdf');
+  }, 1000);
 }
 
 app.whenReady().then(() => {
@@ -73,6 +81,27 @@ ipcMain.on("database-set", (event, args) => {
 ipcMain.on("database-reset", (event, args) => {
   store.clear();
 });
+
+
+/** Local store attachments in base64 */
+
+// attachment Get
+ipcMain.on("attachment-get", (event, key) => {
+  event.reply(key, attachmentStore.get(key));
+});
+
+// attachment set
+ipcMain.on("attachment-set", (event, args) => {
+  const { key, value } = JSON.parse(args);
+  attachmentStore.set(key, value);
+});
+
+// attachment reset
+ipcMain.on("attachment-reset", (event, args) => {
+  attachmentStore.clear();
+});
+
+
 
 
 // ipcMain.on("store-get", (event, key) => {
@@ -106,8 +135,6 @@ ipcMain.on("newSmallWindow", (event, url) => {
 
   if (devMode) smallWindow.webContents.openDevTools();
 })
-
-
 
 
 ipcMain.on("newReportWindow", (event, url) => {
@@ -210,23 +237,105 @@ ipcMain.on("generatePdf", (event, args) => {
   win.webContents.on('did-finish-load', () => {
     setTimeout(() => {
       currentReport.webContents.printToPDF(options2).then(data => {
+
+
         fs.writeFile(filepath2, data, function (err) {
           if (err) {
-            console.log('err', err);
-            systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
+            systemMessage(winContext, 'error', 'No se pudo generar archivo pdf.');
           } else {
-            console.log('PDF Generated Successfully');
-            systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
+            pdfProtectInApi(filepath2, win, `${parsedName}.pdf`);
           }
         });
+
+
       }).catch(error => {
         console.log('error', error)
         systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
       });
 
-    }, 2000);
+    }, 1500);
   });
 });
+
+
+// {
+//   fileInput: arrayBufferToBinary(pdfData),
+//   ownerPassword: 'tecnotecno',
+//   password: "tecnotecno",
+//   keyLength: 40,
+//   // canAssembleDocument: false,
+//   // canExtractContent: false,
+//   canExtractForAccessibility: false,
+//   canFillInForm: false,
+//   canModify: false,
+//   canModifyAnnotations: false,
+//   canPrint: false,
+//   canPrintFaithful: false,
+// }
+
+// const headers = {
+//   // 'X-API-KEY': '8971735c-6932-4a9f-be1f-4691ae8e7c9a',
+//   'Content-Type': `multipart/form-data`,
+//   'accept': '*/*'
+// }
+
+// pdfProtectInApi
+function pdfProtectInApi(filepath, context, fileName) {
+
+  console.log('****** Start protect pdf process ******');
+
+  var form = new FormData();
+
+  form.append('fileInput', fs.readFileSync(filepath), fileName); // application/pdf
+  form.append('ownerPassword', 'tecnotecno');
+  form.append('password', 'tecnotecno');
+  form.append('keyLength', '256');
+
+  const headers = {
+    'accept': '*/*',
+    // 'X-API-KEY': '8971735c-6932-4a9f-be1f-4691ae8e7c9a',
+    'Content-Type': `multipart/form-data`
+  }
+
+  fetch('https://stirlingpdf.io/api/v1/security/add-password', {
+    method: 'POST',
+    headers: headers,
+    body: form
+  }).then(response => {
+    console.log('stirlingResponse');
+    // if (response.status >= 400) { throw new Error("Bad response from server"); }
+    console.log(response.status);
+  }).catch(err => {
+    console.error(err);
+  });
+
+
+
+  // axios.post('https://pdf.app.tecnoescala.com.ec/api/v1/security/add-password', form, { headers: headers })
+  //   .then(function (response) {
+  //     createFileInSystem(filepath, response, context);
+  //     console.log('stirlingResponse');
+  //   })
+  //   .catch(function (error) {
+  //     console.log('stirlingError', error.message);
+  //     clipboard.writeText(error.toString());
+  //   });
+}
+
+
+function createFileInSystem(filepath, buffer, winContext) {
+  console.log(typeof buffer);
+
+  fs.writeFile(filepath, buffer, function (err) {
+    if (err) {
+      console.log('err', err);
+      systemMessage(winContext, 'error', 'No se pudo generar archivo pdf.');
+    } else {
+      console.log('PDF Generated Successfully');
+      systemMessage(winContext, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
+    }
+  });
+}
 
 function systemMessage(win, type, message, closeWindow = true) {
   dialog.showMessageBox(win, {

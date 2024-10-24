@@ -1,0 +1,7 @@
+{
+    "ignore":[
+        "tecno-escala-desktop/",
+        "viwer.json"
+    ],
+    "ext":"js, json, html"
+}
