@@ -10,7 +10,6 @@ const attachmentStore = new Store({ name: 'attachments' });
 const fetch = require("node-fetch");
 var FormData = require('form-data');
 
-
 const devMode = true;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
@@ -50,7 +49,7 @@ function createWindow() {
   if (devMode) mainWindow.webContents.openDevTools();
 
   setTimeout(() => {
-    pdfProtectInApi("C:/Users/lenin/Documents/TecnoEscalaReports/report.pdf", mainWindow, 'report.pdf');
+    pdfProtectInApi("/home/leninriv/Descargas/report.pdf", mainWindow, 'report.pdf');
   }, 1000);
 }
 
@@ -285,26 +284,32 @@ function pdfProtectInApi(filepath, context, fileName) {
   console.log('****** Start protect pdf process ******');
 
   var form = new FormData();
+  // var f = new File([filepath], fileName, { type: "application/pdf" });
 
-  form.append('fileInput', fs.readFileSync(filepath), fileName); // application/pdf
+  var binaryData = fs.readFileSync(filepath).toString('binary');
+
+  form.append('fileInput', binaryData); // application/pdf
+  // form.append('fileInput', f);
   form.append('ownerPassword', 'tecnotecno');
   form.append('password', 'tecnotecno');
   form.append('keyLength', '256');
 
   const headers = {
     'accept': '*/*',
-    // 'X-API-KEY': '8971735c-6932-4a9f-be1f-4691ae8e7c9a',
+    'X-API-KEY': '294bfa6a-d111-4b14-9734-6d70949a1f23',
     'Content-Type': `multipart/form-data`
   }
 
-  fetch('https://stirlingpdf.io/api/v1/security/add-password', {
+  fetch('https://pdf.app.tecnoescala.com.ec/api/v1/security/add-password', {
     method: 'POST',
     headers: headers,
     body: form
   }).then(response => {
     console.log('stirlingResponse');
     // if (response.status >= 400) { throw new Error("Bad response from server"); }
-    console.log(response.status);
+    console.log(response);
+    
+    // console.log(response.status);
   }).catch(err => {
     console.error(err);
   });
