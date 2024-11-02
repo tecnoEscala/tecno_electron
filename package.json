@@ -4,6 +4,7 @@
   "version": "1.5.5",
   "description": "Aplicacion tecnoescala",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
@@ -36,14 +37,15 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^14.0.0",
     "electron-builder": "^22.13.1",
     "nodemon": "^3.1.4"
   },
   "dependencies": {
+    "electron": "^33.0.2",
     "electron-store": "^8.1.0",
+    "filereader": "^0.10.3",
     "form-data": "^4.0.1",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^3.3.2"
   },
   "'version'": "1.4.15"
 }

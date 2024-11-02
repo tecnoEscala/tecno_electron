@@ -1,15 +1,32 @@
 // Modules to control application life and create native browser window
-const { app, ipcMain, BrowserWindow, dialog, clipboard } = require('electron')
-const Store = require('electron-store');
+// const { app, ipcMain, BrowserWindow, dialog, clipboard } = require('electron')
+// const Store = require('electron-store');
 
-const fs = require('fs')
-const path = require('path')
-const os = require('os')
+// const fs = require('fs')
+// const path = require('path')
+// const os = require('os')
+// const attachmentStore = new Store({ name: 'attachments' });
+// const fetch = require("node-fetch");
+// // const { fileFromSync }= require('node-fetch');
+// var FormData = require('form-data');
+
+
+import { app, ipcMain, BrowserWindow, dialog, clipboard } from 'electron';
+
+import Store from 'electron-store';
+import fs from 'fs';
+import os from 'os';
+import fetch, { fileFromSync } from 'node-fetch';
+// import FormData from 'form-data';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
-const fetch = require("node-fetch");
-var FormData = require('form-data');
-
 const devMode = true;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
@@ -48,9 +65,9 @@ function createWindow() {
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
 
-  setTimeout(() => {
-    pdfProtectInApi("/home/leninriv/Descargas/report.pdf", mainWindow, 'report.pdf');
-  }, 1000);
+
+  pdfProtectInApi("/home/leninriv/Descargas/report.pdf", mainWindow, 'report.pdf');
+
 }
 
 app.whenReady().then(() => {
@@ -286,9 +303,10 @@ function pdfProtectInApi(filepath, context, fileName) {
   var form = new FormData();
   // var f = new File([filepath], fileName, { type: "application/pdf" });
 
-  var binaryData = fs.readFileSync(filepath).toString('binary');
+  // var binaryData = fs.readFileSync(filepath);
+  // var file =new File(fs.readFileSync(filepath), fileName, { type: "application/pdf" });
 
-  form.append('fileInput', binaryData); // application/pdf
+  form.append('fileInput', fileFromSync(filepath)); // application/pdf
   // form.append('fileInput', f);
   form.append('ownerPassword', 'tecnotecno');
   form.append('password', 'tecnotecno');
@@ -308,7 +326,7 @@ function pdfProtectInApi(filepath, context, fileName) {
     console.log('stirlingResponse');
     // if (response.status >= 400) { throw new Error("Bad response from server"); }
     console.log(response);
-    
+
     // console.log(response.status);
   }).catch(err => {
     console.error(err);
