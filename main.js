@@ -10,16 +10,17 @@ const attachmentStore = new Store({ name: 'attachments' });
 const fetch = require("node-fetch");
 var FormData = require('form-data');
 
-const devMode = true;
+const devMode = false;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
 let currentReport;
 let multipleReports = [];
+let mainWindow;
 
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     show: false,
     icon: 'icon.ico',
     webPreferences: {
@@ -47,10 +48,6 @@ function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
-
-  setTimeout(() => {
-    pdfProtectInApi("/home/leninriv/Descargas/report.pdf", mainWindow, 'report.pdf');
-  }, 1000);
 }
 
 app.whenReady().then(() => {
@@ -100,21 +97,6 @@ ipcMain.on("attachment-reset", (event, args) => {
   attachmentStore.clear();
 });
 
-
-
-
-// ipcMain.on("store-get", (event, key) => {
-//   vent.reply("res", Store.get(key));
-// });
-
-/* ipcMain is listening the "message" channel, and when the message arrives, 
-  it replies with "pong" */
-// ipcMain.on("message", (event, message) => {
-//   if (message === "ping") {
-//     // event.reply("reply", "pong"); 
-//     console.log('aca llego el mensaje');
-//   }
-// });
 
 ipcMain.on("newSmallWindow", (event, url) => {
   const smallWindow = new BrowserWindow({
@@ -186,7 +168,7 @@ ipcMain.on("persistSync", (event, args) => {
 
 ipcMain.on("generatePdf", (event, args) => {
 
-  const { url, name } = JSON.parse(args)
+  const { url, name, protectPdf } = JSON.parse(args)
   const documentsDirectory = path.join(os.homedir(), '/Documents/TecnoEscalaReports');
 
   if (!fs.existsSync(documentsDirectory)) {
@@ -194,12 +176,10 @@ ipcMain.on("generatePdf", (event, args) => {
   }
 
   var parsedName = name.replace('/', '-');
-  var filepath2 = path.join(documentsDirectory, `${parsedName}.pdf`);
+  const generalName = protectPdf ? 'general' : parsedName;
+  var filepath2 = path.join(documentsDirectory, `${generalName}.pdf`);
   // Docs https://www.electronjs.org/docs/latest/api/web-contents
 
-  // printSelectionOnly: false,
-  // preferCSSPageSize: true,
-  // fitToPageEnabled: true,
   var options2 = {
     "marginsType": 1,
     "landscape": false,
@@ -222,7 +202,6 @@ ipcMain.on("generatePdf", (event, args) => {
     }
   });
 
-
   win.loadURL(url);
 
   if (url.includes('weight_scale_print')) {
@@ -233,20 +212,22 @@ ipcMain.on("generatePdf", (event, args) => {
   // currentReport.show();
   // currentReport.webContents.openDevTools();
 
+  if (protectPdf) systemMessage(win, 'warning', 'Los Archivos protegidos toman tiempo en ser encriptados. Por favor espere...', false);
   win.webContents.on('did-finish-load', () => {
     setTimeout(() => {
       currentReport.webContents.printToPDF(options2).then(data => {
-
-
         fs.writeFile(filepath2, data, function (err) {
           if (err) {
             systemMessage(winContext, 'error', 'No se pudo generar archivo pdf.');
           } else {
-            pdfProtectInApi(filepath2, win, `${parsedName}.pdf`);
+            if (protectPdf) {
+              win.close();
+              pdfProtectInApi(filepath2, `${parsedName}.pdf`);
+            } else {
+              systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
+            }
           }
         });
-
-
       }).catch(error => {
         console.log('error', error)
         systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
@@ -256,48 +237,30 @@ ipcMain.on("generatePdf", (event, args) => {
   });
 });
 
-
-// {
-//   fileInput: arrayBufferToBinary(pdfData),
-//   ownerPassword: 'tecnotecno',
-//   password: "tecnotecno",
-//   keyLength: 40,
-//   // canAssembleDocument: false,
-//   // canExtractContent: false,
-//   canExtractForAccessibility: false,
-//   canFillInForm: false,
-//   canModify: false,
-//   canModifyAnnotations: false,
-//   canPrint: false,
-//   canPrintFaithful: false,
-// }
-
-// const headers = {
-//   // 'X-API-KEY': '8971735c-6932-4a9f-be1f-4691ae8e7c9a',
-//   'Content-Type': `multipart/form-data`,
-//   'accept': '*/*'
-// }
-
 // pdfProtectInApi
-function pdfProtectInApi(filepath, context, fileName) {
+function pdfProtectInApi(filepath, fileName) {
 
   console.log('****** Start protect pdf process ******');
 
   var form = new FormData();
-  // var f = new File([filepath], fileName, { type: "application/pdf" });
+  var binaryData = fs.createReadStream(filepath);
 
-  var binaryData = fs.readFileSync(filepath).toString('binary');
-
-  form.append('fileInput', binaryData); // application/pdf
-  // form.append('fileInput', f);
-  form.append('ownerPassword', 'tecnotecno');
-  form.append('password', 'tecnotecno');
+  form.append('fileInput', binaryData);
+  form.append('ownerPassword', 'laboratorio15');
+  form.append('password', 'servicio1');
   form.append('keyLength', '256');
+  form.append('canAssembleDocument', 'false');
+  form.append('canExtractContent', 'false');
+  form.append('canExtractForAccessibility', 'false');
+  form.append('canFillInForm', 'false');
+  form.append('canModify', 'false');
+  form.append('canModifyAnnotations', 'false');
+  form.append('canPrint', 'false');
+  form.append('canPrintFaithful', 'false');
 
   const headers = {
     'accept': '*/*',
-    'X-API-KEY': '294bfa6a-d111-4b14-9734-6d70949a1f23',
-    'Content-Type': `multipart/form-data`
+    'X-API-KEY': 'a126298c-b5ff-435a-8824-b9b87e4c324d',
   }
 
   fetch('https://pdf.app.tecnoescala.com.ec/api/v1/security/add-password', {
@@ -306,40 +269,33 @@ function pdfProtectInApi(filepath, context, fileName) {
     body: form
   }).then(response => {
     console.log('stirlingResponse');
-    // if (response.status >= 400) { throw new Error("Bad response from server"); }
-    console.log(response);
-    
-    // console.log(response.status);
+    if (response.status >= 400) { throw new Error("Bad response from server"); }
+    response.buffer().then(data => {
+      // fs.writeFileSync('/home/leninriv/Descargas/upload.pdf', data);
+      createFileInSystem(filepath, data, fileName);
+    });
+
   }).catch(err => {
+    systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
     console.error(err);
   });
 
-
-
-  // axios.post('https://pdf.app.tecnoescala.com.ec/api/v1/security/add-password', form, { headers: headers })
-  //   .then(function (response) {
-  //     createFileInSystem(filepath, response, context);
-  //     console.log('stirlingResponse');
-  //   })
-  //   .catch(function (error) {
-  //     console.log('stirlingError', error.message);
-  //     clipboard.writeText(error.toString());
-  //   });
 }
 
-
-function createFileInSystem(filepath, buffer, winContext) {
-  console.log(typeof buffer);
-
-  fs.writeFile(filepath, buffer, function (err) {
+function createFileInSystem(filepath, buffer, fileName) {
+  const name = filepath.replace('general.pdf', fileName);
+  fs.writeFile(name, buffer, function (err) {
     if (err) {
-      console.log('err', err);
-      systemMessage(winContext, 'error', 'No se pudo generar archivo pdf.');
+      systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
     } else {
-      console.log('PDF Generated Successfully');
-      systemMessage(winContext, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
+      systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
     }
+    deleteUnsignedReport(filepath);
   });
+}
+
+function deleteUnsignedReport(filepath) {
+  fs.unlinkSync(filepath);
 }
 
 function systemMessage(win, type, message, closeWindow = true) {
