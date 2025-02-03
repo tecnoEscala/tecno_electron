@@ -44,7 +44,8 @@ function createWindow() {
   });
 
   // C:\Users\lenin\AppData\Roaming\tecnoescala
-  // console.log('database address', app.getPath('userData'));
+  // /home/leninriv/.config/tecnoescala
+  console.log('database address', app.getPath('userData'));
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
@@ -93,7 +94,7 @@ ipcMain.on("attachment-set", (event, args) => {
 });
 
 // attachment reset
-ipcMain.on("attachment-reset", (event, args) => {
+ipcMain.on("attachment-clear", (event, args) => {;
   attachmentStore.clear();
 });
 
