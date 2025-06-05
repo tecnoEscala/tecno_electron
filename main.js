@@ -219,7 +219,8 @@ ipcMain.on("generatePdf", (event, args) => {
       currentReport.webContents.printToPDF(options2).then(data => {
         fs.writeFile(filepath2, data, function (err) {
           if (err) {
-            systemMessage(winContext, 'error', 'No se pudo generar archivo pdf.');
+            systemMessage(win, 'error', err.toString());
+            console.log('err', err)
           } else {
             if (protectPdf) {
               win.close();
