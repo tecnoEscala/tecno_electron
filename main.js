@@ -51,47 +51,6 @@ function createWindow() {
   if (devMode) mainWindow.webContents.openDevTools();
 }
 
-
-async function protectPdf() {
-  const qpdf = await import('node-qpdf2');
-
-  var options = {
-    input: "/home/leninriv/Documents/TecnoEscalaReports/input.pdf",
-    keyLength: 256,
-    output: "/home/leninriv/Documents/TecnoEscalaReports/output2.pdf",
-    password: {
-      owner: 'tecno321',
-      user: '123',
-    },
-    restrictions: {
-      accessibility: "n",
-      annotate: "n",
-      assemble: "n",
-      cleartextMetadata: true,
-      extract: "n",
-      form: "n",
-      modify: "none",
-      modifyOther: "n",
-      print: "none",  // Disallow printing
-      useAes: "n"
-    }
-
-  }
-
-
-  try {
-    await qpdf.encrypt(options);
-  } catch (error) {
-    console.log('++++++++++++++');
-    console.log(error);
-
-
-  }
-
-}
-
-
-
 app.whenReady().then(() => {
   createWindow()
   app.on('activate', function () {
@@ -254,7 +213,6 @@ ipcMain.on("generatePdf", (event, args) => {
 
   // currentReport.show();
   // currentReport.webContents.openDevTools();
-
   if (protectPdf) systemMessage(win, 'warning', 'Los Archivos protegidos toman tiempo en ser encriptados. Por favor espere...', false);
   win.webContents.on('did-finish-load', () => {
     setTimeout(() => {
@@ -266,7 +224,7 @@ ipcMain.on("generatePdf", (event, args) => {
           } else {
             if (protectPdf) {
               win.close();
-              pdfProtectInApi(filepath2, `${parsedName}.pdf`);
+              pdfProtectLocal(filepath2, `${parsedName}.pdf`);
             } else {
               systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
             }
@@ -280,6 +238,41 @@ ipcMain.on("generatePdf", (event, args) => {
     }, 1500);
   });
 });
+
+
+async function pdfProtectLocal(filepath, fileName) {
+  const qpdf = await import('node-qpdf2');
+  const newFileName = filepath.replace('general.pdf', fileName);
+  var options = {
+    input: filepath,
+    keyLength: 256,
+    output: newFileName,
+    password: {
+      owner: 'laboratorio15',
+      user: '',
+    },
+    restrictions: {
+      accessibility: "n",
+      annotate: "n",
+      assemble: "n",
+      extract: "n",
+      form: "n",
+      modify: "none",
+      modifyOther: "n",
+      print: "none",
+      useAes: "n"
+    }
+  }
+  try {
+    await qpdf.encrypt(options);
+    // delete generated Report
+    deleteUnsignedReport(filepath); // general.pdf
+    systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
+  } catch (error) {
+    console.log('protectLocally ERROR: ', error);
+    systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
+  }
+}
 
 // pdfProtectInApi
 function pdfProtectInApi(filepath, fileName) {
