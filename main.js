@@ -10,7 +10,7 @@ const attachmentStore = new Store({ name: 'attachments' });
 const fetch = require("node-fetch");
 var FormData = require('form-data');
 
-const devMode = false;
+const devMode = true;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
@@ -50,6 +50,47 @@ function createWindow() {
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
 }
+
+
+async function protectPdf() {
+  const qpdf = await import('node-qpdf2');
+
+  var options = {
+    input: "/home/leninriv/Documents/TecnoEscalaReports/input.pdf",
+    keyLength: 256,
+    output: "/home/leninriv/Documents/TecnoEscalaReports/output2.pdf",
+    password: {
+      owner: 'tecno321',
+      user: '123',
+    },
+    restrictions: {
+      accessibility: "n",
+      annotate: "n",
+      assemble: "n",
+      cleartextMetadata: true,
+      extract: "n",
+      form: "n",
+      modify: "none",
+      modifyOther: "n",
+      print: "none",  // Disallow printing
+      useAes: "n"
+    }
+
+  }
+
+
+  try {
+    await qpdf.encrypt(options);
+  } catch (error) {
+    console.log('++++++++++++++');
+    console.log(error);
+
+
+  }
+
+}
+
+
 
 app.whenReady().then(() => {
   createWindow()
@@ -94,7 +135,8 @@ ipcMain.on("attachment-set", (event, args) => {
 });
 
 // attachment reset
-ipcMain.on("attachment-clear", (event, args) => {;
+ipcMain.on("attachment-clear", (event, args) => {
+  ;
   attachmentStore.clear();
 });
 
