@@ -10,7 +10,9 @@ const attachmentStore = new Store({ name: 'attachments' });
 const fetch = require("node-fetch");
 var FormData = require('form-data');
 
-const devMode = true;
+// const { runContainer } = require('./stirling.js');
+
+const devMode = false;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
@@ -234,7 +236,6 @@ ipcMain.on("generatePdf", (event, args) => {
         console.log('error', error)
         systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
       });
-
     }, 1500);
   });
 });
@@ -263,15 +264,17 @@ async function pdfProtectLocal(filepath, fileName) {
       useAes: "n"
     }
   }
-  try {
-    await qpdf.encrypt(options);
-    // delete generated Report
-    deleteUnsignedReport(filepath); // general.pdf
-    systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
-  } catch (error) {
-    console.log('protectLocally ERROR: ', error);
-    systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
-  }
+
+  await qpdf.encrypt(options);
+  // delete generated Report
+  deleteUnsignedReport(filepath); // general.pdf
+  systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
+  // try {
+
+  // } catch (error) {
+  // console.log('protectLocally ERROR: ', error);
+  // systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
+  // }
 }
 
 // pdfProtectInApi

@@ -1,7 +1,7 @@
 {
   "name": "tecnoescala",
   "product_name": "Tecnoescala",
-  "version": "1.7.10",
+  "version": "1.7.15",
   "description": "Aplicacion tecnoescala",
   "main": "main.js",
   "scripts": {
@@ -44,7 +44,8 @@
     "electron-store": "^8.1.0",
     "form-data": "^4.0.1",
     "node-fetch": "^2.7.0",
-    "node-qpdf2": "^6.0.0"
+    "node-qpdf2": "^6.0.0",
+    "shelljs": "^0.10.0"
   },
   "'version'": "1.4.15"
 }
