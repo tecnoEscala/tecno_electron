@@ -7,10 +7,9 @@ const path = require('path')
 const os = require('os')
 const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
-const fetch = require("node-fetch");
-var FormData = require('form-data');
 
-// const { runContainer } = require('./stirling.js');
+
+const { deleteUnsignedReport } = require('./stirling.js');
 
 const devMode = false;
 
@@ -51,10 +50,12 @@ function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
+  // pdfProtect('C:/Users/lenin/Downloads/general.pdf', 'lenin.pdf', mainWindow);
 }
 
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
+  deleteUnsignedReport('C:/Users/lenin/Downloads/general.pdf');
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
@@ -63,7 +64,6 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 })
-
 
 // database Get
 ipcMain.on("database-get", (event, key) => {
@@ -81,9 +81,7 @@ ipcMain.on("database-reset", (event, args) => {
   store.clear();
 });
 
-
 /** Local store attachments in base64 */
-
 // attachment Get
 ipcMain.on("attachment-get", (event, key) => {
   event.reply(key, attachmentStore.get(key));
@@ -97,10 +95,8 @@ ipcMain.on("attachment-set", (event, args) => {
 
 // attachment reset
 ipcMain.on("attachment-clear", (event, args) => {
-  ;
   attachmentStore.clear();
 });
-
 
 ipcMain.on("newSmallWindow", (event, url) => {
   const smallWindow = new BrowserWindow({
@@ -120,7 +116,6 @@ ipcMain.on("newSmallWindow", (event, url) => {
 
   if (devMode) smallWindow.webContents.openDevTools();
 })
-
 
 ipcMain.on("newReportWindow", (event, url) => {
   const reportWin = new BrowserWindow({
@@ -240,7 +235,6 @@ ipcMain.on("generatePdf", (event, args) => {
   });
 });
 
-
 async function pdfProtectLocal(filepath, fileName) {
   const qpdf = await import('node-qpdf2');
   const newFileName = filepath.replace('general.pdf', fileName);
@@ -269,73 +263,6 @@ async function pdfProtectLocal(filepath, fileName) {
   // delete generated Report
   deleteUnsignedReport(filepath); // general.pdf
   systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
-  // try {
-
-  // } catch (error) {
-  // console.log('protectLocally ERROR: ', error);
-  // systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
-  // }
-}
-
-// pdfProtectInApi
-function pdfProtectInApi(filepath, fileName) {
-
-  console.log('****** Start protect pdf process ******');
-
-  var form = new FormData();
-  var binaryData = fs.createReadStream(filepath);
-
-  form.append('fileInput', binaryData);
-  form.append('ownerPassword', 'laboratorio15');
-  form.append('password', 'servicio1');
-  form.append('keyLength', '256');
-  form.append('canAssembleDocument', 'false');
-  form.append('canExtractContent', 'false');
-  form.append('canExtractForAccessibility', 'false');
-  form.append('canFillInForm', 'false');
-  form.append('canModify', 'false');
-  form.append('canModifyAnnotations', 'false');
-  form.append('canPrint', 'false');
-  form.append('canPrintFaithful', 'false');
-
-  const headers = {
-    'accept': '*/*',
-    'X-API-KEY': 'a126298c-b5ff-435a-8824-b9b87e4c324d',
-  }
-
-  fetch('https://pdf.app.tecnoescala.com.ec/api/v1/security/add-password', {
-    method: 'POST',
-    headers: headers,
-    body: form
-  }).then(response => {
-    console.log('stirlingResponse');
-    if (response.status >= 400) { throw new Error("Bad response from server"); }
-    response.buffer().then(data => {
-      // fs.writeFileSync('/home/leninriv/Descargas/upload.pdf', data);
-      createFileInSystem(filepath, data, fileName);
-    });
-
-  }).catch(err => {
-    systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
-    console.error(err);
-  });
-
-}
-
-function createFileInSystem(filepath, buffer, fileName) {
-  const name = filepath.replace('general.pdf', fileName);
-  fs.writeFile(name, buffer, function (err) {
-    if (err) {
-      systemMessage(mainWindow, 'error', 'No se pudo generar archivo pdf.', false);
-    } else {
-      systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
-    }
-    deleteUnsignedReport(filepath);
-  });
-}
-
-function deleteUnsignedReport(filepath) {
-  fs.unlinkSync(filepath);
 }
 
 function systemMessage(win, type, message, closeWindow = true) {
