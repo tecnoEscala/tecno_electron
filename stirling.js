@@ -68,10 +68,6 @@ function createFileInSystem(filepath, buffer, fileName, contextWindow) {
   });
 }
 
-// function deleteUnsignedReport(filepath) {
-//   fs.unlinkSync(filepath);
-// }
-
 function systemMessage(win, type, message, closeWindow = true) {
   dialog.showMessageBox(win, {
     type,

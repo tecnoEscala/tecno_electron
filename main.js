@@ -55,7 +55,6 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
-  deleteUnsignedReport('C:/Users/lenin/Downloads/general.pdf');
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
