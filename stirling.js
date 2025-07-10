@@ -2,12 +2,20 @@ const { dialog } = require('electron');
 const fetch = require("node-fetch");
 var FormData = require('form-data');
 const fs = require('fs');
-var shell = require('shelljs');
+var exec = require('child_process').execFile;
 
 
+exports.executeStirling = function () {
+  console.log('*** TODO: run docker container ***');
+  const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {
+    console.log(err)
+    console.log(data.toString());
+  });
 
-exports.runContainer = function () {
-  shell.echo('*** TODO: run docker container ***');
+  setTimeout(() => {
+    process.kill();
+    console.log('Process killed');
+  }, 15000);
 }
 
 exports.pdfProtect = function (filepath, fileName, contextWindow) {
@@ -50,7 +58,7 @@ exports.pdfProtect = function (filepath, fileName, contextWindow) {
 }
 
 exports.deleteUnsignedReport = function (filepath) {
-fs.unlinkSync(filepath);
+  fs.unlinkSync(filepath);
 }
 
 function createFileInSystem(filepath, buffer, fileName, contextWindow) {

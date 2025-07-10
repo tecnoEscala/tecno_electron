@@ -9,7 +9,7 @@ const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
 
 
-const { deleteUnsignedReport } = require('./stirling.js');
+const { deleteUnsignedReport, executeStirling } = require('./stirling.js');
 
 const devMode = false;
 
@@ -51,6 +51,7 @@ function createWindow() {
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
   // pdfProtect('C:/Users/lenin/Downloads/general.pdf', 'lenin.pdf', mainWindow);
+
 }
 
 app.whenReady().then(() => {
