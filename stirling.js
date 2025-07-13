@@ -9,10 +9,15 @@ exports.executeStirling = function () {
   console.log('*** Run Stirling application ***');
 
   return new Promise((resolve, reject) => {
-    const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {
-      if (err) reject(err);
-      resolve(process);
+    const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', (error, data) => {
+      if (error) reject(error);
     });
+
+    setTimeout(() => {
+      console.log('Process killed');
+      resolve(process);
+    }, 15000);
+
   });
 
   // const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {

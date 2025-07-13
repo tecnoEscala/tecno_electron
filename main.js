@@ -19,7 +19,7 @@ let currentReport;
 let multipleReports = [];
 let mainWindow;
 
-function createWindow() {
+async function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     show: false,
@@ -51,7 +51,7 @@ function createWindow() {
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
   // pdfProtect('C:/Users/lenin/Downloads/general.pdf', 'lenin.pdf', mainWindow);
-
+  // await executeStirling();
 }
 
 app.whenReady().then(() => {
