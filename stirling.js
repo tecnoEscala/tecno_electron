@@ -6,16 +6,24 @@ var exec = require('child_process').execFile;
 
 
 exports.executeStirling = function () {
-  console.log('*** TODO: run docker container ***');
-  const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {
-    console.log(err)
-    console.log(data.toString());
+  console.log('*** Run Stirling application ***');
+
+  return new Promise((resolve, reject) => {
+    const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {
+      if (err) reject(err);
+      resolve(process);
+    });
   });
 
-  setTimeout(() => {
-    process.kill();
-    console.log('Process killed');
-  }, 15000);
+  // const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {
+  //   console.log(err)
+  //   console.log(data.toString());
+  // });
+
+  // setTimeout(() => {
+  //   process.kill();
+  //   console.log('Process killed');
+  // }, 15000);
 }
 
 exports.pdfProtect = function (filepath, fileName, contextWindow) {
