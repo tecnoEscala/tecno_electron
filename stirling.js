@@ -76,7 +76,7 @@ function createFileInSystem(filepath, buffer, fileName, contextWindow) {
   });
 }
 
-function systemMessage(win, type, message, closeWindow = true) {
+function systemMessage(win, type, message, closeWindow = false) {
   dialog.showMessageBox(win, {
     type,
     title: 'Tecno Escala System',
