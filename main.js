@@ -1,13 +1,12 @@
 // Modules to control application life and create native browser window
-const { app, ipcMain, BrowserWindow, dialog, clipboard } = require('electron')
+const { app, ipcMain, BrowserWindow, dialog } = require('electron');
 const Store = require('electron-store');
-
+const { encryptPdf } = require('./qpdf2/encrypt.js');
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
-
 
 const { deleteUnsignedReport, executeStirling } = require('./stirling.js');
 
@@ -50,8 +49,8 @@ async function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
-  // pdfProtect('C:/Users/lenin/Downloads/general.pdf', 'lenin.pdf', mainWindow);
   // await executeStirling();
+
 }
 
 app.whenReady().then(() => {
@@ -236,33 +235,39 @@ ipcMain.on("generatePdf", (event, args) => {
 });
 
 async function pdfProtectLocal(filepath, fileName) {
-  const qpdf = await import('node-qpdf2');
-  const newFileName = filepath.replace('general.pdf', fileName);
-  var options = {
-    input: filepath,
-    keyLength: 256,
-    output: newFileName,
-    password: {
-      owner: 'laboratorio15',
-      user: '',
-    },
-    restrictions: {
-      accessibility: "n",
-      annotate: "n",
-      assemble: "n",
-      extract: "n",
-      form: "n",
-      modify: "none",
-      modifyOther: "n",
-      print: "none",
-      useAes: "n"
-    }
-  }
 
-  await qpdf.encrypt(options);
-  // delete generated Report
-  deleteUnsignedReport(filepath); // general.pdf
-  systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
+  try {
+    const newFileName = filepath.replace('general.pdf', fileName);
+    // OPTIONS: https://qpdf.readthedocs.io/en/stable/cli.html#encryption
+    var options = {
+      input: filepath,
+      keyLength: 256,
+      output: newFileName,
+      password: {
+        owner: 'laboratorio15',
+        user: '',
+      },
+      restrictions: {
+        accessibility: "n",
+        annotate: "y",
+        assemble: "n",
+        extract: "y",
+        form: "n",
+        modify: "none",
+        modifyOther: "n",
+        print: "full",
+        useAes: "n"
+      }
+    }
+    await encryptPdf(options);
+    // delete generated Report
+    deleteUnsignedReport(filepath); // general.pdf
+    systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
+  } catch (error) {
+    console.error('Error importing qpdf:', error);
+    systemMessage(mainWindow, 'error', error.toString());
+    return;
+  }
 }
 
 function systemMessage(win, type, message, closeWindow = true) {
