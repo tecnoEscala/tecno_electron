@@ -8,7 +8,7 @@ const os = require('os')
 const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
 
-const { deleteUnsignedReport, executeStirling } = require('./stirling.js');
+const { deleteUnsignedReport, p12ReportSign } = require('./stirling.js');
 
 const devMode = true;
 
@@ -49,7 +49,6 @@ async function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
-  // await executeStirling();
 
 }
 
@@ -174,7 +173,7 @@ ipcMain.on("generatePdf", (event, args) => {
   }
 
   var parsedName = name.replace('/', '-');
-  const generalName = protectPdf ? 'general' : parsedName;
+  const generalName = (protectPdf || tokenPass) ? 'general' : parsedName;
   var filepath2 = path.join(documentsDirectory, `${generalName}.pdf`);
   // Docs https://www.electronjs.org/docs/latest/api/web-contents
 
@@ -223,7 +222,7 @@ ipcMain.on("generatePdf", (event, args) => {
               pdfProtectLocal(filepath2, `${parsedName}.pdf`);
             } else if (tokenPass) {
               console.log('++++++++', tokenPass);
-              p12ReportSign(filepath, tokenPass, win);
+              p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win);
             } else {
               systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
             }

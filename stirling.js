@@ -1,45 +1,37 @@
-const { dialog } = require('electron');
+const { app, dialog } = require('electron');
 const fetch = require("node-fetch");
 var FormData = require('form-data');
 const fs = require('fs');
 var exec = require('child_process').execFile;
 
 
-exports.executeStirling = function () {
-  console.log('*** Run Stirling application ***');
-
+function executeStirling() {
   return new Promise((resolve, reject) => {
     const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', (error, data) => {
       if (error) reject(error);
     });
-
     setTimeout(() => {
-      console.log('Process killed');
+      console.log('*** Stirling application on ***');
       resolve(process);
     }, 15000);
-
   });
-
-  // const process = exec('C:/Program Files/Stirling PDF/Stirling PDF.exe', function (err, data) {
-  //   console.log(err)
-  //   console.log(data.toString());
-  // });
-
-  // setTimeout(() => {
-  //   process.kill();
-  //   console.log('Process killed');
-  // }, 15000);
 }
 
-exports.p12ReportSign = async function (filepath, password, contextWindow) {
+function killStirlingPdf(stirlingProcess) {
+  setTimeout(() => {
+    stirlingProcess.kill();
+  }, 5000);
+}
+
+exports.p12ReportSign = async function (filepath, fileName,  password, contextWindow) {
   console.log('*** Run Stirling sign pdf ***');
   const tokenP12 = app.getPath('userData') + '/token.p12';
-  // const stirlingProcess = await this.executeStirling();
+  const stirlingProcess = await executeStirling();
   var form = new FormData();
   const pdfFile = fs.createReadStream(filepath);
   const token = fs.createReadStream(tokenP12);
   form.append('certType', 'PKCS12');
-  form.append('showSignature', 'true');
+  form.append('showSignature', 'false');
   form.append('showLogo', 'false');
   form.append('password', password);
   form.append('fileInput', pdfFile);
@@ -60,17 +52,16 @@ exports.p12ReportSign = async function (filepath, password, contextWindow) {
     response.buffer().then(data => {
       createFileInSystem(filepath, data, fileName, contextWindow);
     });
-    // stirlingProcess.kill();
-
+    killStirlingPdf(stirlingProcess);
   }).catch(err => {
-    // stirlingProcess.kill();
+    killStirlingPdf(stirlingProcess);
     console.error(err);
   });
 }
 
 
 
-exports.pdfProtect = function (filepath, fileName, contextWindow) {
+exports.pdfProtectStirling = function (filepath, fileName, contextWindow) {
   console.log('****** Start protect pdf process ******');
   var form = new FormData();
   var binaryData = fs.createReadStream(filepath);
@@ -118,7 +109,6 @@ function createFileInSystem(filepath, buffer, fileName, contextWindow) {
   fs.writeFile(name, buffer, function (err) {
     if (err) {
       console.log('Error al escribir el archivo:', err);
-
       systemMessage(contextWindow, 'error', 'No se pudo generar archivo pdf.', false);
     } else {
       console.log('Archivo PDF generado con éxito:', name);
