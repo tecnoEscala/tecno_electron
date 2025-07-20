@@ -31,6 +31,45 @@ exports.executeStirling = function () {
   // }, 15000);
 }
 
+exports.p12ReportSign = async function (filepath, password, contextWindow) {
+  console.log('*** Run Stirling sign pdf ***');
+  const tokenP12 = app.getPath('userData') + '/token.p12';
+  // const stirlingProcess = await this.executeStirling();
+  var form = new FormData();
+  const pdfFile = fs.createReadStream(filepath);
+  const token = fs.createReadStream(tokenP12);
+  form.append('certType', 'PKCS12');
+  form.append('showSignature', 'true');
+  form.append('showLogo', 'false');
+  form.append('password', password);
+  form.append('fileInput', pdfFile);
+  form.append('p12File', token);
+
+  const headers = {
+    "accept": "*/*",
+  }
+
+  fetch('http://localhost:8080/api/v1/security/cert-sign', {
+    method: 'POST',
+    headers: headers,
+    body: form
+  }).then(response => {
+    if (response.status >= 400) {
+      throw new Error("No se puede firmar el archivo pdf");
+    }
+    response.buffer().then(data => {
+      createFileInSystem(filepath, data, fileName, contextWindow);
+    });
+    // stirlingProcess.kill();
+
+  }).catch(err => {
+    // stirlingProcess.kill();
+    console.error(err);
+  });
+}
+
+
+
 exports.pdfProtect = function (filepath, fileName, contextWindow) {
   console.log('****** Start protect pdf process ******');
   var form = new FormData();

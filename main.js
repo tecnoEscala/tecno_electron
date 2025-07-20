@@ -10,7 +10,7 @@ const attachmentStore = new Store({ name: 'attachments' });
 
 const { deleteUnsignedReport, executeStirling } = require('./stirling.js');
 
-const devMode = false;
+const devMode = true;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
@@ -166,7 +166,7 @@ ipcMain.on("persistSync", (event, args) => {
 
 ipcMain.on("generatePdf", (event, args) => {
 
-  const { url, name, protectPdf } = JSON.parse(args)
+  const { url, name, protectPdf, tokenPass } = JSON.parse(args)
   const documentsDirectory = path.join(os.homedir(), '/Documents/TecnoEscalaReports');
 
   if (!fs.existsSync(documentsDirectory)) {
@@ -221,6 +221,9 @@ ipcMain.on("generatePdf", (event, args) => {
             if (protectPdf) {
               win.close();
               pdfProtectLocal(filepath2, `${parsedName}.pdf`);
+            } else if (tokenPass) {
+              console.log('++++++++', tokenPass);
+              p12ReportSign(filepath, tokenPass, win);
             } else {
               systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
             }
