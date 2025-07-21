@@ -40,3 +40,5 @@
 [0720/181126.870:ERROR:context.cc(179)] The cache_path is invalid. Defaulting to in-memory storage.
 [0720/181344.894:ERROR:context.cc(155)] The cache_path directory (C:\Users\lenin\AppData\Roaming\Stirling-PDF\clientWebUI\cache) is not a child of the root_cache_path directory (C:\Users\lenin\AppData\Roaming\Stirling-PDF\clientWebUI\root_cache)
 [0720/181344.894:ERROR:context.cc(179)] The cache_path is invalid. Defaulting to in-memory storage.
+[0721/162906.558:ERROR:context.cc(155)] The cache_path directory (C:\Users\lenin\AppData\Roaming\Stirling-PDF\clientWebUI\cache) is not a child of the root_cache_path directory (C:\Users\lenin\AppData\Roaming\Stirling-PDF\clientWebUI\root_cache)
+[0721/162906.564:ERROR:context.cc(179)] The cache_path is invalid. Defaulting to in-memory storage.

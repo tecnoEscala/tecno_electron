@@ -13,7 +13,24 @@ function executeStirling() {
     setTimeout(() => {
       console.log('*** Stirling application on ***');
       resolve(process);
-    }, 15000);
+    }, 18000);
+  });
+}
+
+function stirlingIsRunning() {
+  const headers = {
+    "accept": "*/*",
+  }
+  return new Promise((resolve, reject) => {
+    fetch('http://localhost:8080', {
+      method: 'GET',
+      headers: headers,
+    }).then(response => {
+      if (response.status >= 400) resolve(false);
+      resolve(true);
+    }).catch(err => {
+      resolve(false)
+    });
   });
 }
 
@@ -23,10 +40,13 @@ function killStirlingPdf(stirlingProcess) {
   }, 5000);
 }
 
-exports.p12ReportSign = async function (filepath, fileName,  password, contextWindow) {
+exports.p12ReportSign = async function (filepath, fileName, password, contextWindow) {
   console.log('*** Run Stirling sign pdf ***');
   const tokenP12 = app.getPath('userData') + '/token.p12';
-  const stirlingProcess = await executeStirling();
+  let stirlingProcess = null;
+  if (!await stirlingIsRunning()) {
+    stirlingProcess = await executeStirling();
+  }
   var form = new FormData();
   const pdfFile = fs.createReadStream(filepath);
   const token = fs.createReadStream(tokenP12);
@@ -52,14 +72,12 @@ exports.p12ReportSign = async function (filepath, fileName,  password, contextWi
     response.buffer().then(data => {
       createFileInSystem(filepath, data, fileName, contextWindow);
     });
-    killStirlingPdf(stirlingProcess);
+    if (stirlingProcess) killStirlingPdf(stirlingProcess);
   }).catch(err => {
-    killStirlingPdf(stirlingProcess);
+    if (stirlingProcess) killStirlingPdf(stirlingProcess);
     console.error(err);
   });
 }
-
-
 
 exports.pdfProtectStirling = function (filepath, fileName, contextWindow) {
   console.log('****** Start protect pdf process ******');
@@ -114,7 +132,7 @@ function createFileInSystem(filepath, buffer, fileName, contextWindow) {
       console.log('Archivo PDF generado con éxito:', name);
       systemMessage(contextWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
     }
-    deleteUnsignedReport(filepath);
+    fs.unlinkSync(filepath);
   });
 }
 

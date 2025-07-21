@@ -49,7 +49,6 @@ async function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
-
 }
 
 app.whenReady().then(() => {
@@ -208,7 +207,7 @@ ipcMain.on("generatePdf", (event, args) => {
 
   // currentReport.show();
   // currentReport.webContents.openDevTools();
-  if (protectPdf) systemMessage(win, 'warning', 'Los Archivos protegidos toman tiempo en ser encriptados. Por favor espere...', false);
+  // if (protectPdf) systemMessage(win, 'warning', 'Los Archivos protegidos toman tiempo en ser encriptados. Por favor espere...', false);
   win.webContents.on('did-finish-load', () => {
     setTimeout(() => {
       currentReport.webContents.printToPDF(options2).then(data => {
