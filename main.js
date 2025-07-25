@@ -45,7 +45,7 @@ async function createWindow() {
 
   // C:\Users\lenin\AppData\Roaming\tecnoescala
   // /home/leninriv/.config/tecnoescala
-  console.log('database address', app.getPath('userData'));
+  // console.log('database address', app.getPath('userData'));
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
@@ -218,7 +218,7 @@ ipcMain.on("generatePdf", (event, args) => {
           } else {
             if (protectPdf) {
               win.close();
-              pdfProtectLocal(filepath2, `${parsedName}.pdf`);
+              pdfProtectLocal(win, filepath2, `${parsedName}.pdf`);
             } else if (tokenPass) {
               console.log('++++++++', tokenPass);
               p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win);
@@ -235,7 +235,7 @@ ipcMain.on("generatePdf", (event, args) => {
   });
 });
 
-async function pdfProtectLocal(filepath, fileName) {
+async function pdfProtectLocal(window, filepath, fileName) {
 
   try {
     const newFileName = filepath.replace('general.pdf', fileName);
@@ -263,10 +263,10 @@ async function pdfProtectLocal(filepath, fileName) {
     await encryptPdf(options);
     // delete generated Report
     deleteUnsignedReport(filepath); // general.pdf
-    systemMessage(mainWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
+    systemMessage(window, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
   } catch (error) {
     console.error('Error importing qpdf:', error);
-    systemMessage(mainWindow, 'error', error.toString());
+    systemMessage(window, 'error', error.toString());
     return;
   }
 }
