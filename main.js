@@ -10,7 +10,7 @@ const attachmentStore = new Store({ name: 'attachments' });
 
 const { deleteUnsignedReport, p12ReportSign } = require('./stirling.js');
 
-const devMode = true;
+const devMode = false;
 
 const mainLoadFile = './tecno-escala-desktop/index.html';
 
