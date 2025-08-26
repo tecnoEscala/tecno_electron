@@ -221,7 +221,7 @@ ipcMain.on("generatePdf", (event, args) => {
               pdfProtectLocal(win, filepath2, `${parsedName}.pdf`);
             } else if (tokenPass) {
               console.log('++++++++', tokenPass);
-              p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win);
+              p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win, currentReport);
             } else {
               systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
             }

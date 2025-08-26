@@ -4,6 +4,7 @@ var FormData = require('form-data');
 const fs = require('fs');
 var exec = require('child_process').execFile;
 
+let currentReport;
 
 function executeStirling() {
   return new Promise((resolve, reject) => {
@@ -40,9 +41,10 @@ function killStirlingPdf(stirlingProcess) {
   }, 5000);
 }
 
-exports.p12ReportSign = async function (filepath, fileName, password, contextWindow) {
+exports.p12ReportSign = async function (filepath, fileName, password, contextWindow, currentRep) {
   console.log('*** Run Stirling sign pdf ***');
-  const tokenP12 = app.getPath('userData') + '/token.p12';
+  currentReport = currentRep;
+  const tokenP12 = app.getPath('userData') + '/token.p12'; // C:\Users\lenin\AppData\Roaming\tecnoescala
   let stirlingProcess = null;
   if (!await stirlingIsRunning()) {
     stirlingProcess = await executeStirling();
