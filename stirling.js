@@ -127,10 +127,10 @@ function createFileInSystem(filepath, buffer, fileName, contextWindow) {
   fs.writeFile(name, buffer, function (err) {
     if (err) {
       console.log('Error al escribir el archivo:', err);
-      systemMessage(contextWindow, 'error', 'No se pudo generar archivo pdf.', false);
+      systemMessage(contextWindow, 'error', 'No se pudo generar archivo pdf.', true);
     } else {
       console.log('Archivo PDF generado con éxito:', name);
-      systemMessage(contextWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', false);
+      systemMessage(contextWindow, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/', true);
     }
     fs.unlinkSync(filepath);
   });
