@@ -217,10 +217,8 @@ ipcMain.on("generatePdf", (event, args) => {
             console.log('err', err)
           } else {
             if (protectPdf) {
-              win.close();
               pdfProtectLocal(win, filepath2, `${parsedName}.pdf`);
             } else if (tokenPass) {
-              console.log('++++++++', tokenPass);
               p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win, currentReport);
             } else {
               systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
@@ -249,13 +247,13 @@ async function pdfProtectLocal(window, filepath, fileName) {
         user: '',
       },
       restrictions: {
-        accessibility: "n",
+        accessibility: "y",
         annotate: "y",
         assemble: "n",
         extract: "y",
-        form: "y",
-        modify: "none",
-        modifyOther: "n",
+        form: "n", // pdf edition
+        modify: "annotate",
+        modifyOther: "y",
         print: "full",
         useAes: "n"
       }
@@ -263,6 +261,7 @@ async function pdfProtectLocal(window, filepath, fileName) {
     await encryptPdf(options);
     // delete generated Report
     deleteUnsignedReport(filepath); // general.pdf
+    currentReport.close();
     systemMessage(window, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
   } catch (error) {
     console.error('Error importing qpdf:', error);

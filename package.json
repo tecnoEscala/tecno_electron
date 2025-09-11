@@ -1,7 +1,7 @@
 {
   "name": "tecnoescala",
   "product_name": "Tecnoescala",
-  "version": "1.7.24",
+  "version": "1.8.0",
   "description": "Aplicacion tecnoescala",
   "main": "main.js",
   "scripts": {

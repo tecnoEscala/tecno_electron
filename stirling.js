@@ -79,6 +79,7 @@ exports.p12ReportSign = async function (filepath, fileName, password, contextWin
     if (stirlingProcess) killStirlingPdf(stirlingProcess);
     console.error(err);
   });
+
 }
 
 exports.pdfProtectStirling = function (filepath, fileName, contextWindow) {
@@ -118,6 +119,8 @@ exports.pdfProtectStirling = function (filepath, fileName, contextWindow) {
   }).catch(err => {
     console.error(err);
   });
+
+  currentRep.close();
 }
 
 exports.deleteUnsignedReport = function (filepath) {
