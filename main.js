@@ -251,8 +251,8 @@ async function pdfProtectLocal(window, filepath, fileName) {
         annotate: "y",
         assemble: "n",
         extract: "y",
-        form: "n", // pdf edition
-        modify: "annotate",
+        form: "y", // pdf edition
+        modify: "none",
         modifyOther: "y",
         print: "full",
         useAes: "n"
