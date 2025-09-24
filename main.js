@@ -49,6 +49,8 @@ async function createWindow() {
 
   // Open the DevTools.
   if (devMode) mainWindow.webContents.openDevTools();
+
+  // pdfProtectLocal({}, "C:/Users/lenin/Downloads/general.pdf", "lenin.pdf");
 }
 
 app.whenReady().then(() => {
@@ -247,13 +249,13 @@ async function pdfProtectLocal(window, filepath, fileName) {
         user: '',
       },
       restrictions: {
-        accessibility: "y",
+        accessibility: "n",
         annotate: "y",
         assemble: "n",
         extract: "y",
-        form: "y", // pdf edition
-        modify: "none",
-        modifyOther: "y",
+        form: "n",
+        modify: "annotate", // pdf edition
+        modifyOther: "n",
         print: "full",
         useAes: "n"
       }
