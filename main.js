@@ -9,6 +9,7 @@ const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
 
 const { deleteUnsignedReport, p12ReportSign } = require('./stirling.js');
+const { signPdf } = require('./pdfLibUtils.js');
 
 const devMode = false;
 
@@ -51,6 +52,8 @@ async function createWindow() {
   if (devMode) mainWindow.webContents.openDevTools();
 
   // pdfProtectLocal({}, "C:/Users/lenin/Downloads/general.pdf", "lenin.pdf");
+
+  signPdf("/home/leninriv/Descargas/general.pdf", "/home/leninriv/Descargas/token.p12", "Jumpejet1935", "/home/leninriv/Descargas/general2.pdf");
 }
 
 app.whenReady().then(() => {
@@ -221,7 +224,15 @@ ipcMain.on("generatePdf", (event, args) => {
             if (protectPdf) {
               pdfProtectLocal(win, filepath2, `${parsedName}.pdf`);
             } else if (tokenPass) {
-              p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win, currentReport);
+              const tokenP12 = app.getPath('userData') + '/token.p12';
+              const newPdfPath = filepath.replace('general.pdf', `${parsedName}.pdf`);
+              try {
+                signPdf(filepath2, tokenP12, tokenPass, newPdfPath);
+                systemMessage(win, 'info', 'Archivo pdf generado con éxito.');
+              } catch (error) {
+                systemMessage(win, 'error', 'No se pudo generar archivo pdf.');
+              }
+              // p12ReportSign(filepath2, `${parsedName}.pdf`, tokenPass, win, currentReport);
             } else {
               systemMessage(win, 'info', 'Archivo pdf generado con éxito. La ruta del archivo es ./Documents/TecnoEscalaReports/');
             }
