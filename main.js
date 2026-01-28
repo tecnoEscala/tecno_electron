@@ -8,7 +8,7 @@ const os = require('os')
 const store = new Store();
 const attachmentStore = new Store({ name: 'attachments' });
 
-const { deleteUnsignedReport, p12ReportSign } = require('./stirling.js');
+const { deleteUnsignedReport } = require('./stirling.js');
 const { signPdf } = require('./pdfLibUtils.js');
 
 const devMode = false;
@@ -52,8 +52,7 @@ async function createWindow() {
   if (devMode) mainWindow.webContents.openDevTools();
 
   // pdfProtectLocal({}, "C:/Users/lenin/Downloads/general.pdf", "lenin.pdf");
-
-  signPdf("/home/leninriv/Descargas/general.pdf", "/home/leninriv/Descargas/token.p12", "Jumpejet1935", "/home/leninriv/Descargas/general2.pdf");
+  // signPdf("/home/leninriv/Descargas/general.pdf", "/home/leninriv/Descargas/token.p12", "/home/leninriv/Descargas/general2.pdf");
 }
 
 app.whenReady().then(() => {
