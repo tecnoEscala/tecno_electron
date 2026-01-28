@@ -52,7 +52,7 @@ async function createWindow() {
   if (devMode) mainWindow.webContents.openDevTools();
 
   // pdfProtectLocal({}, "C:/Users/lenin/Downloads/general.pdf", "lenin.pdf");
-  // signPdf("/home/leninriv/Descargas/general.pdf", "/home/leninriv/Descargas/token.p12", "/home/leninriv/Descargas/general2.pdf");
+  // signPdf("/home/leninriv/Descargas/general.pdf", "/home/leninriv/Descargas/token.p12", "..........pas", /home/leninriv/Descargas/general2.pdf");
 }
 
 app.whenReady().then(() => {
